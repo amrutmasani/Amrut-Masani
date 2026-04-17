@@ -1,0 +1,164 @@
+<header class="tisso-header">
+  <div class="header-top">
+
+    <!-- Mobile Toggle LEFT -->
+    <div class="mobile-toggle" onclick="toggleMenu()">
+      ☰
+    </div>
+
+    <!-- Logo CENTER (mobile me adjust hoga) -->
+    <div class="logo">
+      <a href="/">TISSO VISON</a>
+    </div>
+
+    <!-- Desktop Text -->
+    <div class="header-text desktop-only">
+      Find the ideal gift for your loved ones.
+    </div>
+
+    <!-- Desktop Button -->
+    <div class="header-btn desktop-only">
+      <a href="/collections/all">CHOOSE GIFT →</a>
+    </div>
+
+  </div>
+
+  <!-- Mobile Dropdown -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-content">
+      <p>Find the ideal gift for your loved ones.</p>
+      <a href="/collections/all">CHOOSE GIFT →</a>
+    </div>
+  </div>
+</header>
+
+<style>
+/* BASE */
+.tisso-header {
+  width: 100%;
+  font-family: Arial, sans-serif;
+}
+
+/* HEADER */
+.header-top {
+  display: flex;
+  align-items: center;
+  background: #eaeaea;
+  padding: 15px 40px;
+}
+
+/* TOGGLE LEFT */
+.mobile-toggle {
+  display: none;
+  font-size: 24px;
+  cursor: pointer;
+  margin-right: 15px;
+}
+
+/* LOGO */
+.logo {
+  flex: 1;
+}
+
+.logo a {
+  font-size: 22px;
+  font-weight: 700;
+  text-decoration: none;
+  color: black;
+}
+
+/* TEXT */
+.header-text {
+  flex: 2;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* BUTTON */
+.header-btn {
+  flex: 1;
+  text-align: right;
+}
+
+.header-btn a {
+  background: #f4ea2a;
+  padding: 10px 20px;
+  font-weight: bold;
+  text-decoration: none;
+  color: black;
+}
+
+/* MOBILE MENU */
+.mobile-menu {
+  display: none;
+  background: #eaeaea;
+  text-align: center;
+  padding: 20px;
+}
+
+.mobile-menu.active {
+  display: block;
+}
+
+.mobile-content p {
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.mobile-content a {
+  background: #f4ea2a;
+  padding: 10px 20px;
+  display: inline-block;
+  text-decoration: none;
+  color: black;
+  font-weight: bold;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-toggle {
+    display: block;
+  }
+
+  .header-top {
+    padding: 12px 20px;
+  }
+
+  /* Mobile layout fix */
+  .logo {
+    text-align: center;
+  }
+}
+/* MOBILE TEXT FIX */
+@media (max-width: 768px) {
+  .hero-content p {
+    font-size: 14px;
+    max-width: 260px;
+    margin: 10px auto;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+</style>
+
+<script>
+function toggleMenu() {
+  var menu = document.getElementById("mobileMenu");
+  var toggle = document.querySelector(".mobile-toggle");
+
+  menu.classList.toggle("active");
+
+  if (menu.classList.contains("active")) {
+    toggle.innerHTML = "✕";
+  } else {
+    toggle.innerHTML = "☰";
+  }
+}
+</script>
