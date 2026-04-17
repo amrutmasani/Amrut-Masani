@@ -1,0 +1,267 @@
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .gift-hero-{{ ai_gen_id }} {
+    position: relative;
+    min-height: 600px;
+    display: flex;
+    align-items: flex-end; /* ✅ content bottom */
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .gift-hero-bg-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  .gift-hero-bg-{{ ai_gen_id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .gift-hero-bg-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-content-{{ ai_gen_id }} {
+    position: relative;
+    z-index: 1;
+    max-width: 500px;
+    padding: 60px;
+    margin-bottom: 40px; /* ✅ spacing from bottom */
+    color: {{ block.settings.text_color }};
+  }
+
+  .hero-content-{{ ai_gen_id }} h1 {
+    font-size: 48px;
+    margin: 0 0 20px 0;
+    color: {{ block.settings.heading_color }};
+  }
+
+  .desktop-text-{{ ai_gen_id }} {
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 0 0 30px 0;
+    display: block;
+  }
+
+  .mobile-text-{{ ai_gen_id }} {
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 0 30px 0;
+    display: none;
+  }
+
+  .hero-btn-{{ ai_gen_id }} {
+    display: inline-block;
+    background-color: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text_color }};
+    padding: 15px 30px;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    transition: background-color 0.3s ease;
+  }
+
+  .hero-btn-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_background }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .gift-hero-{{ ai_gen_id }} {
+      min-height: 500px;
+      text-align: center;
+    }
+
+    .hero-content-{{ ai_gen_id }} {
+      padding: 40px 20px;
+      margin: 0 auto 30px; /* ✅ bottom spacing mobile */
+    }
+
+    .hero-content-{{ ai_gen_id }} h1 {
+      font-size: 32px;
+    }
+
+    .desktop-text-{{ ai_gen_id }} {
+      display: none;
+    }
+
+    .mobile-text-{{ ai_gen_id }} {
+      display: block;
+    }
+  }
+  .gift-hero-{{ ai_gen_id }} {
+  position: relative;
+  min-height: 600px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.hero-content-{{ ai_gen_id }} {
+  position: absolute;
+  bottom: 60px;   /* niche se distance */
+  left: 60px;     /* left se distance */
+  max-width: 500px;
+  z-index: 2;
+  color: {{ block.settings.text_color }};
+}
+@media screen and (max-width: 749px) {
+  .gift-hero-{{ ai_gen_id }} {
+    min-height: 500px;
+  }
+
+  .hero-content-{{ ai_gen_id }} {
+    position: absolute;
+    bottom: 30px;
+    left: 20px;
+    right: 20px;
+    text-align: center;
+  }
+}
+.hero-content-{{ ai_gen_id }} {
+  left: auto;
+  right: 60px;
+}
+{% endstyle %}
+
+<section class="gift-hero gift-hero-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="gift-hero-bg-{{ ai_gen_id }}">
+    {% if block.settings.background_image %}
+      <img
+        src="{{ block.settings.background_image | image_url: width: 2000 }}"
+        alt="{{ block.settings.background_image.alt | escape }}"
+        loading="lazy"
+        width="{{ block.settings.background_image.width }}"
+        height="{{ block.settings.background_image.height }}"
+      >
+    {% else %}
+      <div class="gift-hero-bg-placeholder-{{ ai_gen_id }}">
+        {{ 'hero-apparel-1' | placeholder_svg_tag }}
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="hero-content hero-content-{{ ai_gen_id }}">
+    <h1>{{ block.settings.heading }}</h1>
+    <p class="desktop-text desktop-text-{{ ai_gen_id }}">
+      {{ block.settings.desktop_text }}
+    </p>
+    <p class="mobile-text mobile-text-{{ ai_gen_id }}">
+      {{ block.settings.mobile_text }}
+    </p>
+    <a href="{{ block.settings.button_link }}" class="hero-btn hero-btn-{{ ai_gen_id }}">
+      {{ block.settings.button_text }}
+    </a>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Gift Hero",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The Gift Guide"
+    },
+    {
+      "type": "textarea",
+      "id": "desktop_text",
+      "label": "Desktop text",
+      "default": "Discover Joy: Your Ultimate Holiday Gift Destination. Explore our curated selection and find the perfect gifts to delight your loved ones this holiday season."
+    },
+    {
+      "type": "textarea",
+      "id": "mobile_text",
+      "label": "Mobile text",
+      "default": "Discover Joy: Your Ultimate Holiday Gift Destination."
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "SHOP NOW →"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Button background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Button hover background",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Button border radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 4
+    }
+  ],
+  "presets": [
+    {
+      "name": "Gift Hero"
+    }
+  ]
+}
+{% endschema %}

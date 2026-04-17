@@ -1,0 +1,171 @@
+{% doc %}
+  @prompt
+    divider aache SUSTAINABLE, ETHICALLY MADE CLOTHES IN SIZES XXS TO 6XL ye add karo, caps look  and centar me, center  me
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-text-divider-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    padding: {{ block.settings.spacing_top }}px 0 {{ block.settings.spacing_bottom }}px;
+    margin: 0 auto;
+  }
+
+  .ai-text-divider-line-{{ ai_gen_id }} {
+    flex-grow: 1;
+    height: {{ block.settings.line_thickness }}px;
+    background-color: {{ block.settings.line_color }};
+  }
+
+  .ai-text-divider-text-{{ ai_gen_id }} {
+    padding: 0 {{ block.settings.text_spacing }}px;
+    font-size: {{ block.settings.text_size }}px;
+    color: {{ block.settings.text_color }};
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-text-divider-{{ ai_gen_id }} {
+      width: 100%;
+    }
+
+    .ai-text-divider-text-{{ ai_gen_id }} {
+      font-size: {{ block.settings.text_size | times: 0.8 }}px;
+      padding: 0 {{ block.settings.text_spacing | times: 0.8 }}px;
+      white-space: normal;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-text-divider-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  {% if block.settings.show_left_line %}
+    <div class="ai-text-divider-line-{{ ai_gen_id }}"></div>
+  {% endif %}
+  
+  {% if block.settings.divider_text != blank %}
+    <div class="ai-text-divider-text-{{ ai_gen_id }}">
+      {{ block.settings.divider_text }}
+    </div>
+  {% endif %}
+  
+  {% if block.settings.show_right_line %}
+    <div class="ai-text-divider-line-{{ ai_gen_id }}"></div>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Text divider",
+  "settings": [
+    {
+      "type": "text",
+      "id": "divider_text",
+      "label": "Text",
+      "default": "SUSTAINABLE, ETHICALLY MADE CLOTHES IN SIZES XXS TO 6XL"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Text size",
+      "min": 10,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "text_spacing",
+      "label": "Text spacing",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Line"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_left_line",
+      "label": "Show left line",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_right_line",
+      "label": "Show right line",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "line_thickness",
+      "label": "Line thickness",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "line_color",
+      "label": "Line color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "spacing_top",
+      "label": "Top spacing",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "spacing_bottom",
+      "label": "Bottom spacing",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    }
+  ],
+  "presets": [
+    {
+      "name": "Text divider"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,553 @@
+{% doc %}
+  @prompt
+    Create a Product Image Grid block with a popup/quick view modal. When a customer clicks the plus (+) button on a product image, a modal popup opens showing the product image, title, price, variant selector, and a fully functional Add to Cart button. The Add to Cart button inside the modal should properly add the product to the cart using Shopify's AJAX Cart API. The modal should have a white background, black text, 20px border radius, and a close button. The plus button overlay should be 32px, white background with 90% opacity, and black icon. The grid should be responsive and work well on mobile., img thod bada kar do 
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-product-grid-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+  }
+
+  .ai-product-grid-container-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat({{ block.settings.columns_desktop }}, 1fr);
+    gap: {{ block.settings.grid_gap }}px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-product-grid-container-{{ ai_gen_id }} {
+      grid-template-columns: repeat({{ block.settings.columns_mobile }}, 1fr);
+    }
+  }
+
+  .ai-product-grid-item-{{ ai_gen_id }} {
+    position: relative;
+    overflow: hidden;
+    border-radius: {{ block.settings.image_border_radius }}px;
+  }
+
+  .ai-product-grid-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: {{ block.settings.image_border_radius }}px;
+  }
+
+  .ai-product-grid-plus-btn-{{ ai_gen_id }} {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: {{ block.settings.plus_button_size }}px;
+    height: {{ block.settings.plus_button_size }}px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+  }
+
+  .ai-product-grid-item-{{ ai_gen_id }}:hover .ai-product-grid-plus-btn-{{ ai_gen_id }} {
+    opacity: 1;
+  }
+
+  .ai-product-grid-plus-btn-{{ ai_gen_id }} svg {
+    width: calc({{ block.settings.plus_button_size }}px * 0.6);
+    height: calc({{ block.settings.plus_button_size }}px * 0.6);
+    stroke: #000000;
+    stroke-width: 2;
+  }
+
+  .ai-product-grid-modal-overlay-{{ ai_gen_id }} {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .ai-product-grid-modal-overlay-{{ ai_gen_id }}.active {
+    display: flex;
+    opacity: 1;
+  }
+
+  .ai-product-grid-modal-{{ ai_gen_id }} {
+    background-color: #ffffff;
+    border-radius: 20px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    padding: 40px;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+  }
+
+  .ai-product-grid-modal-overlay-{{ ai_gen_id }}.active .ai-product-grid-modal-{{ ai_gen_id }} {
+    transform: scale(1);
+  }
+
+  .ai-product-grid-modal-close-{{ ai_gen_id }} {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+
+  .ai-product-grid-modal-close-{{ ai_gen_id }} svg {
+    width: 24px;
+    height: 24px;
+    stroke: #000000;
+    stroke-width: 2;
+  }
+
+  .ai-product-grid-modal-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    margin-bottom: 24px;
+  }
+
+  .ai-product-grid-modal-title-{{ ai_gen_id }} {
+    font-size: 24px;
+    font-weight: 700;
+    color: #000000;
+    margin: 0 0 12px;
+  }
+
+  .ai-product-grid-modal-price-{{ ai_gen_id }} {
+    font-size: 20px;
+    font-weight: 600;
+    color: #000000;
+    margin: 0 0 24px;
+  }
+
+  .ai-product-grid-variant-selector-{{ ai_gen_id }} {
+    margin-bottom: 24px;
+  }
+
+  .ai-product-grid-variant-label-{{ ai_gen_id }} {
+    font-size: 14px;
+    font-weight: 600;
+    color: #000000;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .ai-product-grid-variant-select-{{ ai_gen_id }} {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #dfdfdf;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #000000;
+    background-color: #ffffff;
+    cursor: pointer;
+  }
+
+  .ai-product-grid-add-to-cart-{{ ai_gen_id }} {
+    width: 100%;
+    padding: 16px 24px;
+    background-color: #000000;
+    color: #ffffff;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .ai-product-grid-add-to-cart-{{ ai_gen_id }}:hover {
+    background-color: #333333;
+  }
+
+  .ai-product-grid-add-to-cart-{{ ai_gen_id }}:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+
+  .ai-product-grid-message-{{ ai_gen_id }} {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    text-align: center;
+    display: none;
+  }
+
+  .ai-product-grid-message-{{ ai_gen_id }}.success {
+    background-color: #d4edda;
+    color: #155724;
+    display: block;
+  }
+
+  .ai-product-grid-message-{{ ai_gen_id }}.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    display: block;
+  }
+{% endstyle %}
+
+<product-image-grid-{{ ai_gen_id }} class="ai-product-grid-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-product-grid-container-{{ ai_gen_id }}">
+    {% for i in (1..6) %}
+      {% liquid
+        assign product_key = 'product_' | append: i
+        assign product = block.settings[product_key]
+      %}
+      
+      {% if product != blank %}
+        <div class="ai-product-grid-item-{{ ai_gen_id }}" data-product-id="{{ product.id }}">
+          {% if product.featured_image %}
+            <img
+              src="{{ product.featured_image | image_url: width: 800 }}"
+              alt="{{ product.featured_image.alt | escape }}"
+              class="ai-product-grid-image-{{ ai_gen_id }}"
+              loading="lazy"
+              width="800"
+              height="800"
+            >
+          {% endif %}
+          
+          <button
+            class="ai-product-grid-plus-btn-{{ ai_gen_id }}"
+            aria-label="Quick view {{ product.title }}"
+            data-product-handle="{{ product.handle }}"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="ai-product-grid-modal-overlay-{{ ai_gen_id }}">
+    <div class="ai-product-grid-modal-{{ ai_gen_id }}">
+      <button class="ai-product-grid-modal-close-{{ ai_gen_id }}" aria-label="Close modal">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      
+      <div class="ai-product-grid-modal-content-{{ ai_gen_id }}">
+        <img class="ai-product-grid-modal-image-{{ ai_gen_id }}" src="" alt="">
+        <h3 class="ai-product-grid-modal-title-{{ ai_gen_id }}"></h3>
+        <div class="ai-product-grid-modal-price-{{ ai_gen_id }}"></div>
+        
+        <div class="ai-product-grid-variant-selector-{{ ai_gen_id }}" style="display: none;">
+          <label class="ai-product-grid-variant-label-{{ ai_gen_id }}">Select variant</label>
+          <select class="ai-product-grid-variant-select-{{ ai_gen_id }}"></select>
+        </div>
+        
+        <button class="ai-product-grid-add-to-cart-{{ ai_gen_id }}">Add to cart</button>
+        <div class="ai-product-grid-message-{{ ai_gen_id }}"></div>
+      </div>
+    </div>
+  </div>
+</product-image-grid-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class ProductImageGrid{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.modal = this.querySelector('.ai-product-grid-modal-overlay-{{ ai_gen_id }}');
+        this.modalImage = this.querySelector('.ai-product-grid-modal-image-{{ ai_gen_id }}');
+        this.modalTitle = this.querySelector('.ai-product-grid-modal-title-{{ ai_gen_id }}');
+        this.modalPrice = this.querySelector('.ai-product-grid-modal-price-{{ ai_gen_id }}');
+        this.variantSelector = this.querySelector('.ai-product-grid-variant-selector-{{ ai_gen_id }}');
+        this.variantSelect = this.querySelector('.ai-product-grid-variant-select-{{ ai_gen_id }}');
+        this.addToCartBtn = this.querySelector('.ai-product-grid-add-to-cart-{{ ai_gen_id }}');
+        this.message = this.querySelector('.ai-product-grid-message-{{ ai_gen_id }}');
+        this.currentProduct = null;
+      }
+
+      connectedCallback() {
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        const plusButtons = this.querySelectorAll('.ai-product-grid-plus-btn-{{ ai_gen_id }}');
+        plusButtons.forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const productHandle = e.currentTarget.getAttribute('data-product-handle');
+            this.openModal(productHandle);
+          });
+        });
+
+        const closeBtn = this.querySelector('.ai-product-grid-modal-close-{{ ai_gen_id }}');
+        closeBtn.addEventListener('click', () => this.closeModal());
+
+        this.modal.addEventListener('click', (e) => {
+          if (e.target === this.modal) {
+            this.closeModal();
+          }
+        });
+
+        this.variantSelect.addEventListener('change', () => {
+          this.updatePrice();
+        });
+
+        this.addToCartBtn.addEventListener('click', () => {
+          this.addToCart();
+        });
+      }
+
+      async openModal(productHandle) {
+        try {
+          const response = await fetch(`/products/${productHandle}.js`);
+          const product = await response.json();
+          this.currentProduct = product;
+          
+          this.modalImage.src = product.featured_image;
+          this.modalImage.alt = product.title;
+          this.modalTitle.textContent = product.title;
+          
+          if (product.variants.length > 1) {
+            this.variantSelector.style.display = 'block';
+            this.variantSelect.innerHTML = '';
+            product.variants.forEach(variant => {
+              const option = document.createElement('option');
+              option.value = variant.id;
+              option.textContent = variant.title;
+              option.disabled = !variant.available;
+              this.variantSelect.appendChild(option);
+            });
+          } else {
+            this.variantSelector.style.display = 'none';
+          }
+          
+          this.updatePrice();
+          this.modal.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        } catch (error) {
+          console.error('Error loading product:', error);
+        }
+      }
+
+      closeModal() {
+        this.modal.classList.remove('active');
+        document.body.style.overflow = '';
+        this.message.classList.remove('success', 'error');
+        this.message.style.display = 'none';
+      }
+
+      updatePrice() {
+        if (!this.currentProduct) return;
+        
+        let selectedVariant;
+        if (this.currentProduct.variants.length > 1) {
+          const selectedId = parseInt(this.variantSelect.value);
+          selectedVariant = this.currentProduct.variants.find(v => v.id === selectedId);
+        } else {
+          selectedVariant = this.currentProduct.variants[0];
+        }
+        
+        if (selectedVariant) {
+          const price = (selectedVariant.price / 100).toFixed(2);
+          this.modalPrice.textContent = `$${price}`;
+          this.addToCartBtn.disabled = !selectedVariant.available;
+          this.addToCartBtn.textContent = selectedVariant.available ? 'Add to cart' : 'Sold out';
+        }
+      }
+
+      async addToCart() {
+        if (!this.currentProduct) return;
+        
+        let variantId;
+        if (this.currentProduct.variants.length > 1) {
+          variantId = parseInt(this.variantSelect.value);
+        } else {
+          variantId = this.currentProduct.variants[0].id;
+        }
+        
+        this.addToCartBtn.disabled = true;
+        this.addToCartBtn.textContent = 'Adding...';
+        
+        try {
+          const response = await fetch('/cart/add.js', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              id: variantId,
+              quantity: 1
+            })
+          });
+          
+          if (response.ok) {
+            this.showMessage('Product added to cart!', 'success');
+            this.addToCartBtn.textContent = 'Added!';
+            
+            setTimeout(() => {
+              this.closeModal();
+            }, 1500);
+            
+            document.dispatchEvent(new CustomEvent('cart:refresh'));
+          } else {
+            throw new Error('Failed to add to cart');
+          }
+        } catch (error) {
+          this.showMessage('Failed to add to cart. Please try again.', 'error');
+          this.addToCartBtn.disabled = false;
+          this.addToCartBtn.textContent = 'Add to cart';
+        }
+      }
+
+      showMessage(text, type) {
+        this.message.textContent = text;
+        this.message.classList.remove('success', 'error');
+        this.message.classList.add(type);
+        this.message.style.display = 'block';
+      }
+    }
+
+    customElements.define('product-image-grid-{{ ai_gen_id }}', ProductImageGrid{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Product image grid",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Grid layout"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Columns on desktop",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Columns on mobile",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "range",
+      "id": "grid_gap",
+      "label": "Gap between items",
+      "min": 8,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Image border radius",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "plus_button_size",
+      "label": "Plus button size",
+      "min": 24,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Products"
+    },
+    {
+      "type": "product",
+      "id": "product_1",
+      "label": "Product 1"
+    },
+    {
+      "type": "product",
+      "id": "product_2",
+      "label": "Product 2"
+    },
+    {
+      "type": "product",
+      "id": "product_3",
+      "label": "Product 3"
+    },
+    {
+      "type": "product",
+      "id": "product_4",
+      "label": "Product 4"
+    },
+    {
+      "type": "product",
+      "id": "product_5",
+      "label": "Product 5"
+    },
+    {
+      "type": "product",
+      "id": "product_6",
+      "label": "Product 6"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product image grid"
+    }
+  ]
+}
+{% endschema %}
